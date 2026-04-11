@@ -1,0 +1,29 @@
+// Like all visible unliked posts, then scroll and repeat
+function likePosts() {
+  // Target only buttons that have NOT been liked yet
+  const likeButtons = [...document.querySelectorAll('button[aria-label="Reaction button state: no reaction"]')];
+
+  likeButtons.forEach((btn, i) => {
+    setTimeout(() => {
+      btn.click();
+      console.log(`Liked post ${i + 1} of ${likeButtons.length}`);
+    }, i * 1500); // 1.5 second delay between each like
+  });
+
+  return likeButtons.length;
+}
+
+// Run once immediately
+console.log(`Found ${likePosts()} posts to like.`);
+
+// Then scroll down and like every 6 seconds
+let autoLike = setInterval(() => {
+  window.scrollBy({ top: 800, behavior: 'smooth' });
+  setTimeout(() => {
+    const count = likePosts();
+    console.log(`Found ${count} new posts to like after scroll.`);
+  }, 2000); // wait 2 seconds for new posts to load
+}, 6000);
+
+// To STOP, paste this in the console:
+// clearInterval(autoLike);
