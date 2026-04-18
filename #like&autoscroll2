@@ -1,0 +1,98 @@
+const likedPosts = new Set();
+const RUN_DURATION = 10 * 60 * 1000;
+const startTime = Date.now();
+
+const el = document.getElementById('workspace');
+
+let autoLike;
+let isRunning = false;
+
+function randDelay(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function timeLeft() {
+  return RUN_DURATION - (Date.now() - startTime);
+}
+
+function likePosts() {
+  const likeButtons = [...document.querySelectorAll('button[aria-label="Reaction button state: no reaction"]')]
+    .filter(btn => !likedPosts.has(btn));
+
+  let cumulativeDelay = 0;
+
+  likeButtons.forEach((btn) => {
+    likedPosts.add(btn);
+    cumulativeDelay += randDelay(2000, 6000);
+
+    setTimeout(() => {
+      if (timeLeft() <= 0) return;
+      btn.click();
+      console.log(`Liked post #${likedPosts.size}`);
+    }, cumulativeDelay);
+  });
+
+  return cumulativeDelay;
+}
+
+function scrollFeed() {
+  if (!el) {
+    console.log("No #workspace container found");
+    return;
+  }
+
+  el.scrollBy({
+    top: randDelay(500, 900),
+    behavior: 'smooth'
+  });
+
+  console.log("Scrolling feed...");
+}
+
+function run() {
+  if (timeLeft() <= 0) {
+    console.log(`✅ Finished! Liked ${likedPosts.size} posts.`);
+    return;
+  }
+
+  if (isRunning) return;
+  isRunning = true;
+
+  const likeTime = likePosts();
+
+  setTimeout(() => {
+    if (timeLeft() <= 0) {
+      isRunning = false;
+      return;
+    }
+
+    scrollFeed();
+
+    setTimeout(() => {
+      isRunning = false;
+    }, randDelay(2000, 4000));
+
+  }, likeTime + randDelay(1500, 3000));
+}
+
+function scheduleNext() {
+  const nextRun = randDelay(9000, 15000);
+
+  autoLike = setTimeout(() => {
+    if (timeLeft() <= 0) {
+      console.log(`✅ Finished! Liked ${likedPosts.size} posts.`);
+      return;
+    }
+
+    run();
+    scheduleNext();
+  }, nextRun);
+}
+
+console.log("🚀 Auto-liker started");
+
+run();
+scheduleNext();
+
+// STOP:
+// clearTimeout(autoLike);
